@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yurnero — The Juggernaut Playbook · Patch 7.41</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0b0e0d; --panel:#121815; --panel-2:#19221e; --raise:#202b26;
+    --line:rgba(190,214,203,.11); --line-2:rgba(190,214,203,.20);
+    --bone:#f4f1e8; --steel:#b6c3bb; --muted:#7c8b83;
+    --jade:#2fe6a6; --jade-deep:#0e5f47; --jade-soft:rgba(47,230,166,.14);
+    --crimson:#ff6363; --crimson-soft:rgba(255,99,99,.12);
+    --gold:#e2b357; --gold-soft:rgba(226,179,87,.12);
+    --steelblue:#8fc0d4;
+    --rail:236px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    margin:0;background:var(--void);color:var(--steel);
+    font-family:'Inter',system-ui,sans-serif;font-size:15.5px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(1100px 600px at 82% -8%, rgba(47,230,166,.06), transparent 60%),
+      radial-gradient(900px 500px at -5% 12%, rgba(143,192,212,.05), transparent 55%);
+    background-attachment:fixed;
+  }
+  h1,h2,h3,h4,.disp{font-family:'Chakra Petch',sans-serif;color:var(--bone);letter-spacing:.2px}
+  a{color:var(--jade);text-decoration:none}
+  strong{color:var(--bone);font-weight:600}
+  em{color:var(--steelblue);font-style:normal}
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{display:flex;max-width:1240px;margin:0 auto;position:relative}
+  main{flex:1 1 auto;min-width:0;padding:0 clamp(18px,4vw,54px) 120px}
+
+  /* ---------- LEFT RAIL NAV ---------- */
+  .rail{
+    width:var(--rail);flex:0 0 var(--rail);position:sticky;top:0;align-self:flex-start;
+    height:100vh;overflow-y:auto;padding:26px 14px 40px;border-right:1px solid var(--line);
+    scrollbar-width:thin;scrollbar-color:var(--line-2) transparent;
+  }
+  .rail::-webkit-scrollbar{width:6px}.rail::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:6px}
+  .rail .brand{display:flex;gap:10px;align-items:center;padding:0 8px 18px;margin-bottom:10px;border-bottom:1px solid var(--line)}
+  .rail .brand .m{width:34px;height:34px;border-radius:8px;border:1px solid var(--line-2);object-fit:cover;flex:0 0 auto;background:var(--panel-2)}
+  .rail .brand b{font-family:'Chakra Petch';font-weight:700;color:var(--bone);font-size:14px;line-height:1.1;letter-spacing:.4px}
+  .rail .brand span{display:block;font-size:10.5px;color:var(--jade);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
+  .rail nav{display:flex;flex-direction:column;gap:1px}
+  .rail a{
+    display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;
+    color:var(--muted);font-size:13px;font-weight:500;font-family:'Chakra Petch';letter-spacing:.3px;
+    transition:.15s;border:1px solid transparent;
+  }
+  .rail a .n{font-size:10px;color:var(--jade-deep);min-width:16px;font-weight:700}
+  .rail a:hover{color:var(--steel);background:var(--panel)}
+  .rail a.on{color:var(--bone);background:var(--jade-soft);border-color:rgba(47,230,166,.25)}
+  .rail a.on .n{color:var(--jade)}
+
+  .mobtop{display:none}
+
+  /* ---------- HERO / HEADER ---------- */
+  .hero{position:relative;padding:56px 0 34px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .hero .eyebrow{font-family:'Chakra Petch';font-size:11.5px;letter-spacing:4px;text-transform:uppercase;color:var(--jade)}
+  .hero h1{font-size:clamp(38px,7vw,74px);line-height:.96;margin:12px 0 6px;font-weight:700;letter-spacing:-.5px}
+  .hero h1 small{display:block;font-size:clamp(14px,2.4vw,20px);color:var(--steel);font-weight:500;letter-spacing:3px;margin-top:10px;text-transform:uppercase}
+  .hero .verdict{max-width:56ch;font-size:16.5px;color:var(--steel);margin:18px 0 0}
+  .hero-top{display:flex;gap:34px;align-items:center;flex-wrap:wrap}
+  .portrait{
+    position:relative;width:158px;height:158px;flex:0 0 auto;display:grid;place-items:center;
+  }
+  .portrait img{width:104px;height:104px;border-radius:50%;object-fit:cover;border:2px solid rgba(47,230,166,.4);
+    box-shadow:0 0 40px rgba(47,230,166,.25);background:var(--panel-2);position:relative;z-index:2}
+  .portrait .initial{position:absolute;z-index:1;font-family:'Chakra Petch';font-weight:700;font-size:40px;color:var(--jade)}
+  .ring{position:absolute;inset:0;border-radius:50%;border:2px dashed rgba(47,230,166,.55);animation:spin 9s linear infinite}
+  .ring.r2{inset:14px;border-style:dotted;border-color:rgba(143,192,212,.4);animation-duration:6s;animation-direction:reverse}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.ring{animation:none}}
+
+  .glance{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+  .glance .g{
+    display:flex;flex-direction:column;padding:9px 14px;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);min-width:104px;
+  }
+  .glance .g b{font-family:'Chakra Petch';color:var(--bone);font-size:15px}
+  .glance .g span{font-size:10.5px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+  .glance .g.jade b{color:var(--jade)} .glance .g.gold b{color:var(--gold)}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:52px 0 8px;scroll-margin-top:20px;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:none}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-head .num{font-family:'Chakra Petch';font-weight:700;font-size:13px;color:var(--jade);letter-spacing:1px;
+    border:1px solid rgba(47,230,166,.3);border-radius:6px;padding:2px 8px;background:var(--jade-soft)}
+  h2{font-size:clamp(24px,4vw,34px);margin:0;font-weight:700;line-height:1.05}
+  .lead{color:var(--muted);max-width:66ch;margin:6px 0 26px;font-size:15px}
+  h3{font-size:18px;margin:30px 0 12px;font-weight:600;display:flex;align-items:center;gap:9px}
+  h3::before{content:"";width:10px;height:10px;transform:rotate(45deg);background:var(--jade);flex:0 0 auto;box-shadow:0 0 10px rgba(47,230,166,.6)}
+  h4{font-size:14px;margin:20px 0 8px;color:var(--bone);letter-spacing:.5px}
+
+  p{margin:0 0 14px}
+  ul{margin:0 0 16px;padding-left:0;list-style:none}
+  ul li{position:relative;padding-left:20px;margin-bottom:8px}
+  ul li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;background:var(--jade);transform:rotate(45deg)}
+  ul.dash li::before{background:none;content:"—";left:0;top:0;color:var(--jade);transform:none;font-weight:700}
+
+  /* ---------- CARDS / GRID ---------- */
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr 1fr}}
+  @media(max-width:520px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card.tint{background:linear-gradient(160deg,var(--panel),var(--panel-2))}
+  .card h4{margin-top:0}
+  .card .k{font-family:'Chakra Petch';font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--jade)}
+
+  /* ---------- STAT HUD ---------- */
+  .hud{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+  .stat::after{content:"";position:absolute;right:-14px;top:-14px;width:44px;height:44px;background:var(--jade-soft);border-radius:50%;filter:blur(6px)}
+  .stat .v{font-family:'Chakra Petch';font-weight:700;font-size:26px;color:var(--bone);line-height:1}
+  .stat .v small{font-size:13px;color:var(--jade);font-weight:600}
+  .stat .l{font-size:10.5px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);margin-top:6px}
+
+  /* ---------- CHIPS (items / heroes) ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 16px}
+  .chip{display:inline-flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+    border-radius:9px;padding:6px 12px 6px 6px;font-size:13.5px;color:var(--steel);font-weight:500}
+  .chip b{color:var(--bone);font-weight:600}
+  .chip .sub{color:var(--muted);font-size:11.5px}
+  .ic{position:relative;width:30px;height:30px;border-radius:7px;background:var(--panel-2);flex:0 0 auto;
+    display:inline-grid;place-items:center;overflow:hidden;border:1px solid var(--line)}
+  .ic::before{content:attr(data-i);font-family:'Chakra Petch';font-weight:700;font-size:10px;color:var(--jade);letter-spacing:.3px}
+  .ic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ic.hero{width:40px;height:30px;border-radius:6px}
+  .chip.core{border-color:rgba(47,230,166,.35);background:var(--jade-soft)}
+  .chip.warn{border-color:rgba(255,99,99,.3)} .chip.warn .ic::before{color:var(--crimson)}
+  .chip.good{border-color:rgba(47,230,166,.3)}
+
+  /* ---------- TIMELINE ---------- */
+  .tl{position:relative;margin:10px 0 8px;padding-left:26px}
+  .tl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(var(--jade),var(--jade-deep),transparent)}
+  .tl .row{position:relative;margin-bottom:16px}
+  .tl .row::before{content:"";position:absolute;left:-24px;top:5px;width:12px;height:12px;transform:rotate(45deg);
+    background:var(--void);border:2px solid var(--jade);box-shadow:0 0 8px rgba(47,230,166,.5)}
+  .tl .t{font-family:'Chakra Petch';font-weight:700;color:var(--jade);font-size:13px;letter-spacing:1px}
+
+  /* ---------- ABILITY BLOCK ---------- */
+  .abil{display:flex;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  .abil .ic{width:52px;height:52px;border-radius:10px}
+  .abil .ic::before{font-size:12px}
+  .abil .body{min-width:0}
+  .abil .body .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .abil .body h4{margin:0;font-size:16px}
+  .tag{font-family:'Chakra Petch';font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:5px;
+    border:1px solid var(--line-2);color:var(--muted)}
+  .tag.jade{color:var(--jade);border-color:rgba(47,230,166,.35);background:var(--jade-soft)}
+  .tag.gold{color:var(--gold);border-color:rgba(226,179,87,.35);background:var(--gold-soft)}
+  .abil p{margin:6px 0 0;font-size:14px}
+  .abil .hint{margin-top:9px;font-size:13px;color:var(--steelblue);border-left:2px solid var(--jade-deep);padding-left:11px}
+
+  /* ---------- SKILL GRID ---------- */
+  .skillgrid{overflow-x:auto;padding-bottom:6px}
+  table.skill{border-collapse:collapse;width:100%;min-width:560px;font-family:'Chakra Petch';font-size:12px}
+  table.skill td,table.skill th{border:1px solid var(--line);text-align:center;padding:6px 4px}
+  table.skill th{color:var(--muted);font-weight:600;letter-spacing:.5px}
+  table.skill .lv{color:var(--jade);font-weight:700}
+  table.skill td.on{background:var(--jade-soft);color:var(--bone);font-weight:700}
+  table.skill td.ult{background:var(--gold-soft);color:var(--gold)}
+  table.skill td.tal{background:rgba(143,192,212,.12);color:var(--steelblue)}
+
+  /* ---------- TALENTS ---------- */
+  .talents{display:flex;flex-direction:column;gap:10px}
+  .tal-row{display:grid;grid-template-columns:52px 1fr 1fr;gap:10px;align-items:stretch}
+  .tal-lv{display:grid;place-items:center;font-family:'Chakra Petch';font-weight:700;font-size:18px;color:var(--gold);
+    background:var(--gold-soft);border:1px solid rgba(226,179,87,.3);border-radius:10px}
+  .tal-opt{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:13.5px}
+  .tal-opt.pick{border-color:rgba(47,230,166,.4);background:var(--jade-soft)}
+  .tal-opt .meta{font-family:'Chakra Petch';font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.5px}
+  .tal-opt.pick .meta{color:var(--jade)}
+  @media(max-width:560px){.tal-row{grid-template-columns:44px 1fr}.tal-row .tal-lv{grid-row:span 2}}
+
+  /* ---------- FACET TOGGLE ---------- */
+  .toggle{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:16px;gap:4px}
+  .toggle button{font-family:'Chakra Petch';font-weight:600;font-size:13px;color:var(--muted);background:none;border:none;
+    padding:8px 18px;border-radius:7px;cursor:pointer;letter-spacing:.5px;transition:.15s}
+  .toggle button.on{background:var(--jade-soft);color:var(--jade)}
+  .facet-panel{display:none} .facet-panel.on{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ---------- MATCHUP / COUNTER CARDS ---------- */
+  .matchgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+  @media(max-width:760px){.matchgrid{grid-template-columns:1fr}}
+  .mrow{display:flex;flex-direction:column;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;padding:15px 16px;height:100%}
+  .mrow.bad{border-top:3px solid var(--crimson)}
+  .mrow.good{border-top:3px solid var(--jade)}
+  .mrow .who{display:flex;align-items:center;gap:13px;margin-bottom:11px}
+  .mrow .who .ic.hero{width:84px;height:48px;border-radius:10px;border-color:var(--line-2)}
+  .mrow.bad .who .ic.hero{border-color:rgba(255,99,99,.4)}
+  .mrow.good .who .ic.hero{border-color:rgba(47,230,166,.4)}
+  .mrow .who .ic.hero::before{font-size:12px}
+  .mrow .who b{color:var(--bone);font-family:'Chakra Petch';font-weight:700;font-size:17px;line-height:1.05;letter-spacing:.3px}
+  .mrow .why{font-size:13.5px}
+  .mrow .fix{font-size:12.5px;color:var(--steelblue);margin-top:9px;border-top:1px solid var(--line);padding-top:9px}
+  .mrow .fix b{color:var(--steelblue)}
+
+  /* ---------- CALLOUT ---------- */
+  .call{border-radius:12px;padding:15px 18px;margin:18px 0;font-size:14px;border:1px solid var(--line)}
+  .call.tip{background:var(--jade-soft);border-color:rgba(47,230,166,.3)}
+  .call.warn{background:var(--crimson-soft);border-color:rgba(255,99,99,.3)}
+  .call.gold{background:var(--gold-soft);border-color:rgba(226,179,87,.3)}
+  .call .lab{font-family:'Chakra Petch';font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:5px}
+  .call.tip .lab{color:var(--jade)} .call.warn .lab{color:var(--crimson)} .call.gold .lab{color:var(--gold)}
+
+  /* ---------- DODO LISTS ---------- */
+  .dodont{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.dodont{grid-template-columns:1fr}}
+  .dodont .col{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .dodont .do .h{color:var(--jade)} .dodont .dont .h{color:var(--crimson)}
+  .dodont .h{font-family:'Chakra Petch';font-weight:700;letter-spacing:1px;font-size:13px;text-transform:uppercase;margin-bottom:10px}
+  .dodont .dont li::before{background:var(--crimson)}
+
+  /* checklist */
+  .check li{padding-left:26px}
+  .check li::before{content:"✓";color:var(--jade);left:0;top:0;background:none;transform:none;font-weight:700}
+
+  footer{padding:40px 0 10px;color:var(--muted);font-size:12px;line-height:1.7}
+  footer b{color:var(--steel)}
+
+  /* mobile rail -> top */
+  @media(max-width:960px){
+    .rail{display:none}
+    .mobtop{display:block;position:sticky;top:0;z-index:40;background:rgba(11,14,13,.92);backdrop-filter:blur(10px);
+      border-bottom:1px solid var(--line)}
+    .mobtop .bar{display:flex;align-items:center;gap:10px;padding:10px 16px}
+    .mobtop .bar b{font-family:'Chakra Petch';color:var(--bone);font-size:14px;letter-spacing:.5px}
+    .mobtop .bar span{color:var(--jade);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-left:auto}
+    .mobtop nav{display:flex;gap:6px;overflow-x:auto;padding:0 12px 10px;scrollbar-width:none}
+    .mobtop nav::-webkit-scrollbar{display:none}
+    .mobtop nav a{white-space:nowrap;font-family:'Chakra Petch';font-size:12px;color:var(--muted);padding:6px 11px;
+      border:1px solid var(--line);border-radius:20px;font-weight:500}
+    .mobtop nav a.on{color:var(--jade);border-color:rgba(47,230,166,.4);background:var(--jade-soft)}
+    main{padding-left:16px;padding-right:16px}
+    .hero{padding-top:30px}
+  }
+</style>
+</head>
+<body>
+
+<!-- MOBILE TOP NAV -->
+<div class="mobtop">
+  <div class="bar"><b>YURNERO · JUGGERNAUT</b><span>Pos 1 · 7.41</span></div>
+  <nav id="mnav"></nav>
+</div>
+
+<div class="wrap">
+  <!-- LEFT RAIL -->
+  <aside class="rail">
+    <div class="brand">
+      <span class="ic" data-i="JUG" style="width:34px;height:34px;border-radius:8px"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png" alt="" onerror="this.remove()"></span>
+      <div><b>YURNERO</b><span>Coach's Playbook</span></div>
+    </div>
+    <nav id="railnav"></nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <!-- HERO -->
+    <header class="hero" id="top">
+      <div class="hero-top">
+        <div class="portrait">
+          <div class="ring"></div><div class="ring r2"></div>
+          <div class="initial">爾</div>
+          <img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/juggernaut.png" alt="Juggernaut" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <div class="eyebrow">Melee · Agility · Carry · The Isle of Masks</div>
+          <h1>Juggernaut<small>The Coach's Complete Playbook — Patch 7.41</small></h1>
+        </div>
+      </div>
+      <p class="verdict">A self-sufficient position&nbsp;1 who wins his lane, snowballs the mid-game with <strong>Omnislash</strong> pickoffs, and finishes as a crit-cleave right-click monster. Easy to pick up, deceptively hard to master: his ceiling lives in <em>mana management, Omnislash isolation, and knowing when to spin</em>.</p>
+      <div class="glance">
+        <div class="g jade"><b>Position 1</b><span>Safelane Carry</span></div>
+        <div class="g"><b>~52%</b><span>Win Rate 7.41d</span></div>
+        <div class="g"><b>+1.2%</b><span>Avg Lane @10</span></div>
+        <div class="g jade"><b>Level 6</b><span>First Power Spike</span></div>
+        <div class="g gold"><b>2 Innates</b><span>Duelist + Bladeform</span></div>
+        <div class="g"><b>Blink→Omni</b><span>Signature Play</span></div>
+      </div>
+    </header>
+
+    <!-- 1 OVERVIEW -->
+    <section id="overview">
+      <div class="sec-head"><span class="num">01</span><h2>Hero Identity &amp; When to Pick</h2></div>
+      <p class="lead">Understand what you are before you learn how to play. Juggernaut is a <strong>tempo carry</strong> — strongest when he translates a won lane and an early Omnislash into map pressure, not a hero who wants to farm silently for 40 minutes.</p>
+
+      <div class="grid g3">
+        <div class="card tint"><span class="k">Win Condition</span><h4 style="margin:6px 0 4px">Snowball the map</h4><p style="font-size:13.5px;margin:0">Win lane → hit 6 → pick off isolated targets with Omnislash → convert kills into towers, camps and item timings. Close before enemy carries scale.</p></div>
+        <div class="card tint"><span class="k">Playstyle</span><h4 style="margin:6px 0 4px">Aggressive &amp; mobile</h4><p style="font-size:13.5px;margin:0">Blade Fury clears and dodges, Bladeform keeps you fast, Battle Fury flash-farms. You are constantly moving between fights, farm and objectives.</p></div>
+        <div class="card tint"><span class="k">Skill Floor / Ceiling</span><h4 style="margin:6px 0 4px">Low floor, high ceiling</h4><p style="font-size:13.5px;margin:0">Anyone can right-click and spin. The mastery is Omnislash target isolation, spin-dodging, ward micro and mana discipline.</p></div>
+      </div>
+
+      <h3>Pick Juggernaut when…</h3>
+      <ul>
+        <li>Your team lacks a <strong>self-reliant carry</strong> that wins its own lane with little babysitting.</li>
+        <li>You want a hero that provides <strong>early-to-mid pickoff pressure</strong>, not just a 40-minute farm plan.</li>
+        <li>The enemy draft has <strong>squishy, immobile cores/supports</strong> that Omnislash deletes (Sniper, Crystal Maiden, Zeus, Invoker, Lina).</li>
+        <li>You have a support with a <strong>reliable stun or slow</strong> to set up First Blood and Omnislash.</li>
+        <li>You want built-in survivability — Blade Fury's debuff immunity + Healing Ward means fewer babysitting supports.</li>
+      </ul>
+
+      <h3>Avoid / rethink when…</h3>
+      <ul>
+        <li>Enemy has stacked <strong>illusions/summons</strong> (Naga, Phantom Lancer, Meepo, Broodmother, Chen) — Omnislash scatters onto units and creeps.</li>
+        <li>Heavy <strong>evasion, physical block, or invulnerability saves</strong> (Butterfly stackers, Omniknight's Guardian Angel, OD's Astral) blunt your ultimate.</li>
+        <li>Enemy has <strong>Break</strong> (Silver Edge, Viper) — turning off Blade Dance and Bladeform strips a huge chunk of your damage.</li>
+        <li>Hard counters like <strong>Ursa</strong> or <strong>Legion Commander</strong> are open and your team can't peel.</li>
+      </ul>
+    </section>
+
+    <!-- 2 STATS -->
+    <section id="stats">
+      <div class="sec-head"><span class="num">02</span><h2>Base Stats &amp; Attributes</h2></div>
+      <p class="lead">Approximate patch-7.41 baseline values — always confirm live numbers in the client, as balance shifts each patch. What matters for coaching is the <em>shape</em> of the hero: enormous agility growth, a fast attack, low base armor, and a thin mana pool.</p>
+
+      <div class="hud">
+        <div class="stat"><div class="v">Agility</div><div class="l">Primary Attribute</div></div>
+        <div class="stat"><div class="v">~34 <small>+2.6</small></div><div class="l">Agility / lvl</div></div>
+        <div class="stat"><div class="v">~20 <small>+2.2</small></div><div class="l">Strength / lvl</div></div>
+        <div class="stat"><div class="v">~14 <small>+1.4</small></div><div class="l">Intelligence / lvl</div></div>
+        <div class="stat"><div class="v">305</div><div class="l">Move Speed</div></div>
+        <div class="stat"><div class="v">150</div><div class="l">Attack Range (melee)</div></div>
+        <div class="stat"><div class="v">1.4s</div><div class="l">Base Attack Time (fast)</div></div>
+        <div class="stat"><div class="v">3 <small>hit</small></div><div class="l">Omnislash slashes @6</div></div>
+      </div>
+
+      <div class="grid g2" style="margin-top:20px">
+        <div class="card">
+          <h4 style="color:var(--jade)">Where Juggernaut is strong</h4>
+          <ul class="dash" style="margin-bottom:0">
+            <li><strong>Highest-tier agility growth</strong> → free armor, damage and attack speed as you level.</li>
+            <li><strong>Fast base attack time</strong> → converts attack speed and crit into real DPS quickly.</li>
+            <li><strong>Built-in defense</strong> from Blade Fury (debuff immunity) and Healing Ward (% max-HP heal).</li>
+            <li><strong>Guaranteed burst</strong> from Omnislash regardless of items — strong the moment you hit 6.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--crimson)">Where Juggernaut is weak</h4>
+          <ul class="dash" style="margin-bottom:0">
+            <li><strong>Tiny mana pool</strong> (low INT) — the single most common death cause: no mana for Omnislash + spin.</li>
+            <li><strong>Low base armor</strong> before items → punished by early physical harass.</li>
+            <li><strong>No self-lockdown</strong> — needs Basher/Abyssal or allied CC to hold targets down.</li>
+            <li><strong>Omnislash is conditional</strong> — creeps, illusions, evasion and invuln all counter it.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 INNATE ABILITIES -->
+    <section id="facets">
+      <div class="sec-head"><span class="num">03</span><h2>Innate Abilities</h2></div>
+      <div class="call warn"><span class="lab">Patch 7.41 — Facets removed</span>Valve <strong>removed Facets from the entire game in Patch 7.41</strong> (March 2026). There is no longer any draft-phase choice on Juggernaut. <strong>Bladeform is now a permanent innate</strong> that every Juggernaut has, and the old <strong>Bladestorm</strong> Blade Fury component was deleted. So Juggernaut now runs with <strong>two always-on innates: Duelist and Bladeform.</strong></div>
+
+      <div class="abil" style="border-color:rgba(226,179,87,.3)">
+        <span class="ic" data-i="DUEL" style="border-color:rgba(226,179,87,.35)"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/juggernaut_duelist.png" alt="" onerror="this.remove()"></span>
+        <div class="body">
+          <div class="top"><h4>Duelist</h4><span class="tag gold">Innate · always on</span></div>
+          <p>Deals <strong>bonus damage to enemies who are facing Juggernaut</strong>. The bonus is <strong>always active during Omnislash and Swift Slash</strong>, so your ultimate always gets the full value.</p>
+          <div class="hint">Coaching cue: chasing a fleeing enemy from behind gives less; attacking into someone who turns to fight — or any Omnislash — triggers the full bonus. Position to attack faces. (Note: the old level-10 "+Duelist amplification" talent was replaced in 7.41.)</div>
+        </div>
+      </div>
+
+      <div class="abil" style="border-color:rgba(47,230,166,.3)">
+        <span class="ic" data-i="FORM" style="border-color:rgba(47,230,166,.35)"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/juggernaut_bladeform.png" alt="" onerror="this.remove()"></span>
+        <div class="body">
+          <div class="top"><h4>Bladeform</h4><span class="tag jade">Innate · always on (was a facet)</span></div>
+          <p>Gains a stacking bonus of <strong>base Agility + Movement Speed for every interval you go without taking damage</strong> — up to 10 stacks. Base every 2s (the level-10 talent drops it to 1s); the per-stack agility bonus now also scales with your hero level (buffed in 7.41). Taking damage dispels the stacks after a short linger.</p>
+          <div class="hint">Play clean to keep stacks high — avoid needless creep/harass damage while farming and you carry free agility and speed everywhere. It makes you a faster farmer and a relentless chaser, and it's a big reason a won lane snowballs so hard. <strong>Break</strong> (Silver Edge, Viper) stops new stacks from forming.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 ABILITIES -->
+    <section id="abilities">
+      <div class="sec-head"><span class="num">04</span><h2>Abilities — Mechanics &amp; How to Use</h2></div>
+      <p class="lead">Each spell has a "what it does" and a "when a coach wants you to press it." The gap between average and great Juggernauts is almost entirely in these usage windows.</p>
+
+      <div class="abil">
+        <span class="ic" data-i="Q"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/juggernaut_blade_fury.png" alt="" onerror="this.remove()"></span>
+        <div class="body">
+          <div class="top"><h4>Blade Fury</h4><span class="tag jade">Q · No-target</span></div>
+          <p>A whirling storm of blades that deals magic damage per second to enemies around you for the duration and grants <strong>debuff immunity</strong> (spell-immunity), plus a <strong>strong dispel on yourself when the spin ends</strong>. You can move — and auto-attack — while spinning.</p>
+          <p style="margin-top:8px"><strong>Uses:</strong> early kill pressure &amp; harass, instant camp/wave clear, farming, and — most importantly — a <em>reactive dodge tool</em>: spinning removes and blocks most targeted disables the instant they'd land.</p>
+          <div class="hint">Not a cure-all: it does <strong>not</strong> block displacement (Meat Hook, Skewer knock), and several ults <strong>pierce</strong> it (Doom, Legion's Duel, Dismember, Beastmaster's not, but Pugna's Nether Ward damages you <em>before</em> immunity applies). Aghanim's Shard adds radius + a 35% slow. Talent adds +120 DPS and +45 move speed while spinning.</div>
+        </div>
+      </div>
+
+      <div class="abil">
+        <span class="ic" data-i="W"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/juggernaut_healing_ward.png" alt="" onerror="this.remove()"></span>
+        <div class="body">
+          <div class="top"><h4>Healing Ward</h4><span class="tag jade">W · Summon · Controllable</span></div>
+          <p>Summons a fast-moving ward that heals all nearby allies for a <strong>percentage of their max HP</strong> each second for ~25s. It's controllable — micro it to follow you or hide it.</p>
+          <p style="margin-top:8px"><strong>Uses:</strong> sustain through lane harass, top up between camps, and — the big one — <em>heal your whole team mid-fight</em>. Percentage healing scales, so it only gets stronger as everyone buys HP.</p>
+          <div class="hint">It has almost no HP and dies to any hit or AoE. Drop it <strong>behind trees / on high ground / at the fight's edge</strong> and body-block enemies trying to snipe it. Bind ward control so you can reposition it without stopping your attacks. One point is plenty until everything else is maxed.</div>
+        </div>
+      </div>
+
+      <div class="abil">
+        <span class="ic" data-i="E"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/juggernaut_blade_dance.png" alt="" onerror="this.remove()"></span>
+        <div class="body">
+          <div class="top"><h4>Blade Dance</h4><span class="tag jade">E · Passive</span></div>
+          <p>~35% chance to deal bonus critical damage on each attack (pseudo-random). This is the passive that turns your fast attacks + cleave into a genuine right-click threat and scales hard with attack speed and armor reduction.</p>
+          <div class="hint">Scaling engine: crit loves attack speed, cleave (Battle Fury) and armor reduction. Talents make it hit harder (+15% crit damage) and — huge — grant <strong>+40% lifesteal on Blade Dance</strong> at level 25, turning your right-click into self-sustain.</div>
+        </div>
+      </div>
+
+      <div class="abil">
+        <span class="ic" data-i="R"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/juggernaut_omni_slash.png" alt="" onerror="this.remove()"></span>
+        <div class="body">
+          <div class="top"><h4>Omnislash</h4><span class="tag gold">R · Ultimate · Channeled</span></div>
+          <p>Leap to a target and perform a series of slashes over the duration, <strong>invulnerable</strong> throughout, jumping to random enemies within ~450 units between hits. Your signature pickoff and your best "get out of jail" button.</p>
+          <p style="margin-top:8px"><strong>Uses:</strong> delete an isolated squishy target; or use it <em>defensively</em> — the invulnerability dodges a teamfight-ending spell combo. Duelist is always active during it.</p>
+          <div class="hint"><strong>Isolation is everything.</strong> Nearby creeps, illusions and heroes steal slashes. Cast it in open ground, pull the target away, or use terrain — every wasted slash is damage you needed. Blink in first to guarantee you reach the right hero.</div>
+        </div>
+      </div>
+
+      <div class="grid g2">
+        <div class="abil" style="margin:0;border-color:rgba(226,179,87,.3)">
+          <span class="ic" data-i="AS"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/aghanims_shard.png" alt="" onerror="this.remove()"></span>
+          <div class="body"><div class="top"><h4>Aghanim's Shard</h4><span class="tag gold">Upgrade</span></div>
+          <p style="margin:4px 0 0;font-size:13.5px">Upgrades <strong>Blade Fury</strong> — bigger radius and a <strong>35% move-speed slow</strong> on enemies inside. Turns your spin into a catch/chase tool and area control. Situational, usually a later luxury.</p></div>
+        </div>
+        <div class="abil" style="margin:0;border-color:rgba(226,179,87,.3)">
+          <span class="ic" data-i="R2"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/juggernaut_swift_slash.png" alt="" onerror="this.remove()"></span>
+          <div class="body"><div class="top"><h4>Swift Slash (Scepter)</h4><span class="tag gold">Aghanim's Scepter</span></div>
+          <p style="margin:4px 0 0;font-size:13.5px">Grants a <strong>short Omnislash on a separate cooldown</strong>. A second burst window, an extra farming/mobility tool, and a mini-escape. A core damage/tempo item this patch (~32 min).</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 SKILL BUILD -->
+    <section id="skillbuild">
+      <div class="sec-head"><span class="num">05</span><h2>Skill Build &amp; Leveling Order</h2></div>
+      <p class="lead">Max Blade Fury first for damage and low cooldown, take a value point in Healing Ward for sustain, then pour into Blade Dance. Ultimate whenever available. This is the highest-win-rate order at 7000&ndash;8500 MMR.</p>
+
+      <div class="skillgrid">
+        <table class="skill">
+          <tr><th>Level</th><td class="lv">1</td><td class="lv">2</td><td class="lv">3</td><td class="lv">4</td><td class="lv">5</td><td class="lv">6</td><td class="lv">7</td><td class="lv">8</td><td class="lv">9</td><td class="lv">10</td><td class="lv">11-13</td><td class="lv">12/18</td></tr>
+          <tr><th>Blade Fury</th><td class="on">•</td><td></td><td class="on">•</td><td></td><td class="on">•</td><td></td><td class="on">✔</td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><th>Healing Ward</th><td></td><td class="on">•</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>max last</td><td></td></tr>
+          <tr><th>Blade Dance</th><td></td><td></td><td></td><td class="on">•</td><td></td><td></td><td></td><td class="on">•</td><td class="on">•</td><td></td><td class="on">✔</td><td></td></tr>
+          <tr><th>Omnislash</th><td></td><td></td><td></td><td></td><td></td><td class="ult">•</td><td></td><td></td><td></td><td></td><td></td><td class="ult">•</td></tr>
+          <tr><th>Talent</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="tal">★</td><td></td><td></td></tr>
+        </table>
+      </div>
+
+      <div class="grid g2" style="margin-top:6px">
+        <div class="card"><h4>The order in words</h4>
+          <ul class="dash" style="margin-bottom:0;font-size:13.5px">
+            <li><strong>Lvl 1:</strong> Blade Fury — your damage, wave clear and dodge from minute zero.</li>
+            <li><strong>Lvl 2:</strong> Healing Ward — sustain to out-last lane harass (skip to Blade Dance only if your lane is completely free).</li>
+            <li><strong>Lvl 3&ndash;7:</strong> continue maxing Blade Fury; take Omnislash at 6.</li>
+            <li><strong>Lvl 8&ndash;13:</strong> max Blade Dance for right-click scaling.</li>
+            <li><strong>Ult at 6 / 12 / 18</strong>, Healing Ward maxed last.</li>
+          </ul>
+        </div>
+        <div class="card"><h4>Situational tweaks</h4>
+          <ul class="dash" style="margin-bottom:0;font-size:13.5px">
+            <li><strong>Heavy harass lane:</strong> a second Healing Ward point early can keep you healthy.</li>
+            <li><strong>Free / winning lane:</strong> value-point Blade Dance sooner for faster farm and kill damage.</li>
+            <li><strong>Bladeform is innate now</strong>, so the level-10 −1s stack-interval talent is near-mandatory and is worth taking over a 10th ability point (as the top pros do).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 TALENTS -->
+    <section id="talents">
+      <div class="sec-head"><span class="num">06</span><h2>Talent Tree</h2></div>
+      <p class="lead">Highlighted side = the high-MMR pick this patch, with live pick/win rates. Read them as defaults, not laws — the crit-damage and lifesteal talents are near-auto, the level-15 choice flexes.</p>
+
+      <div class="talents">
+        <div class="tal-row">
+          <div class="tal-lv">25</div>
+          <div class="tal-opt pick"><strong>+40% Blade Dance Lifesteal</strong><div class="meta">68.7% pick · 66.4% win</div></div>
+          <div class="tal-opt">+1s Omnislash Duration<div class="meta">31.3% pick · 60.2% win</div></div>
+        </div>
+        <div class="tal-row">
+          <div class="tal-lv">20</div>
+          <div class="tal-opt pick"><strong>+15% Blade Dance Crit Damage</strong><div class="meta">88.7% pick · 59.1% win</div></div>
+          <div class="tal-opt">+120 Blade Fury DPS<div class="meta">11.3% pick · 56.1% win</div></div>
+        </div>
+        <div class="tal-row">
+          <div class="tal-lv">15</div>
+          <div class="tal-opt pick"><strong>−15s Omnislash Cooldown</strong><div class="meta">75.1% pick · 53.8% win</div></div>
+          <div class="tal-opt">+45 Move Speed during Blade Fury<div class="meta">24.9% pick · 55.1% win</div></div>
+        </div>
+        <div class="tal-row">
+          <div class="tal-lv">10</div>
+          <div class="tal-opt pick"><strong>−1s Bladeform Stack Interval</strong><div class="meta">81.5% pick · 53.6% win</div></div>
+          <div class="tal-opt">−12s Healing Ward Cooldown<div class="meta">18.5% pick · 49.8% win</div></div>
+        </div>
+      </div>
+
+      <div class="call tip"><span class="lab">Coach's read</span><strong>25 &amp; 20 are locked in</strong> — lifesteal makes your right-click unkillable, crit damage is pure scaling. <strong>Level 15</strong> flexes: take −15s Omnislash cooldown to be a relentless pickoff threat, or +45 spin move-speed if you're kited and need to close. <strong>Level 10</strong> is the −1s Bladeform stack interval by default (Bladeform is innate to every Juggernaut now, so faster stacks = more free agility &amp; speed); take −12s Healing Ward cooldown only in heavy sustain/teamfight games.</div>
+    </section>
+
+    <!-- 7 ITEMS -->
+    <section id="items">
+      <div class="sec-head"><span class="num">07</span><h2>Item Progression</h2></div>
+      <p class="lead">The 7.41 meta build: laning regen &amp; stats → Power Treads → Battle Fury to explode your farm → a Yasha-based tempo item → damage &amp; evasion → Blink for Omnislash → Aghanim's for a second ult. Then read the game for situational buys.</p>
+
+      <h3>Starting items</h3>
+      <div class="chips">
+        <span class="chip"><span class="ic" data-i="QB"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/quelling_blade.png" onerror="this.remove()"></span>Quelling Blade</span>
+        <span class="chip"><span class="ic" data-i="TG"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/tango.png" onerror="this.remove()"></span>Tango</span>
+        <span class="chip"><span class="ic" data-i="SV"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/flask.png" onerror="this.remove()"></span>Healing Salve</span>
+        <span class="chip"><span class="ic" data-i="BR"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/branches.png" onerror="this.remove()"></span>Iron Branch ×2</span>
+        <span class="chip"><span class="ic" data-i="CR"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/circlet.png" onerror="this.remove()"></span>Circlet</span>
+        <span class="chip"><span class="ic" data-i="MG"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/enchanted_mango.png" onerror="this.remove()"></span>Enchanted Mango</span>
+      </div>
+      <p style="font-size:13.5px;color:var(--muted);margin-top:-4px">Build the Circlet + Branches into an early <strong>Wraith Band</strong> and later <strong>Magic Wand</strong>. Keep a Mango for emergency Omnislash/Blade Fury mana. Prefer Iron Branches over loose Slippers early — better gold value that upgrades.</p>
+
+      <h3>Early game (≈0&ndash;12 min)</h3>
+      <div class="chips">
+        <span class="chip core"><span class="ic" data-i="MW"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/magic_wand.png" onerror="this.remove()"></span><b>Magic Wand</b><span class="sub">~4m</span></span>
+        <span class="chip core"><span class="ic" data-i="PT"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/power_treads.png" onerror="this.remove()"></span><b>Power Treads</b><span class="sub">~6m</span></span>
+        <span class="chip"><span class="ic" data-i="WB"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/wraith_band.png" onerror="this.remove()"></span>Wraith Band</span>
+      </div>
+      <p style="font-size:13.5px;color:var(--muted);margin-top:-4px"><strong>Power Treads on Strength</strong> to cast Omnislash + spin, toggle to Agility while attacking. This toggle is a core habit — a mistimed toggle is a missed kill.</p>
+
+      <h3>Core build &amp; timings</h3>
+      <div class="tl">
+        <div class="row"><div class="t">≈13 min · Battle Fury</div><p style="margin:2px 0 0;font-size:13.5px">Your farm accelerant. Cleave + regen lets you clear camps and waves in seconds. <strong>Rush this</strong> — every other item comes faster because of it.</p></div>
+        <div class="row"><div class="t">≈17 min · Yasha</div><p style="margin:2px 0 0;font-size:13.5px">Movement + attack speed + agility. The stepping-stone to Manta; keeps your tempo high.</p></div>
+        <div class="row"><div class="t">≈21 min · Manta Style</div><p style="margin:2px 0 0;font-size:13.5px">Illusions for farm/push/fight, plus a <strong>dispel</strong> to shrug off silences, roots and slows. Massive survivability and DPS spike.</p></div>
+        <div class="row"><div class="t">≈28 min · Butterfly</div><p style="margin:2px 0 0;font-size:13.5px">Evasion, attack speed, agility, damage — your full right-click carry item and a defensive layer against physical cores.</p></div>
+        <div class="row"><div class="t">≈31 min · Blink Dagger → Swift Blink</div><p style="margin:2px 0 0;font-size:13.5px">The Omnislash delivery system. Blink in to isolate and guarantee your target, then upgrade to <strong>Swift Blink</strong> for the attack-speed burst.</p></div>
+        <div class="row"><div class="t">≈32 min · Aghanim's Scepter</div><p style="margin:2px 0 0;font-size:13.5px"><strong>Swift Slash</strong> — a second Omnislash on its own cooldown. Doubles your pickoff and burst potential.</p></div>
+      </div>
+
+      <div class="chips" style="margin-top:6px">
+        <span class="chip core"><span class="ic" data-i="BF"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/bfury.png" onerror="this.remove()"></span><b>Battle Fury</b></span>
+        <span class="chip core"><span class="ic" data-i="YA"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/yasha.png" onerror="this.remove()"></span><b>Yasha</b></span>
+        <span class="chip core"><span class="ic" data-i="MA"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/manta.png" onerror="this.remove()"></span><b>Manta Style</b></span>
+        <span class="chip core"><span class="ic" data-i="BU"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/butterfly.png" onerror="this.remove()"></span><b>Butterfly</b></span>
+        <span class="chip core"><span class="ic" data-i="BL"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/swift_blink.png" onerror="this.remove()"></span><b>Swift Blink</b></span>
+        <span class="chip core"><span class="ic" data-i="AG"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/items/ultimate_scepter.png" onerror="this.remove()"></span><b>Aghanim's Scepter</b></span>
+      </div>
+
+      <h3>Situational &amp; luxury</h3>
+      <div class="grid g2">
+        <div class="card">
+          <h4 style="color:var(--jade)">Buy when…</h4>
+          <ul class="dash" style="font-size:13.5px;margin-bottom:0">
+            <li><span style="color:var(--bone)">Skull Basher → Abyssal Blade</span> — you need lockdown to land Omnislash/right-click on mobile targets.</li>
+            <li><span style="color:var(--bone)">Monkey King Bar</span> — enemy stacks <em>evasion</em> (PA, Windranger, Butterfly carriers). True-strike is mandatory.</li>
+            <li><span style="color:var(--bone)">Nullifier</span> — vs Ghost Scepter, Eul's, Glimmer, heavy heals or blink-away targets (mute + slow).</li>
+            <li><span style="color:var(--bone)">Eye of Skadi</span> — tankiness + a huge slow, and cuts enemy healing.</li>
+            <li><span style="color:var(--bone)">Linken's Sphere</span> — vs single-target initiation (Doom, Legion Duel, Hex, Hook).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--gold)">Flex / late</h4>
+          <ul class="dash" style="font-size:13.5px;margin-bottom:0">
+            <li><span style="color:var(--bone)">Sange &amp; Yasha</span> — a cheaper, status-resist tempo alternative to Manta if you're behind.</li>
+            <li><span style="color:var(--bone)">Diffusal / Disperser</span> — mana burn + a dispel and mobility (Disperser).</li>
+            <li><span style="color:var(--bone)">Aghanim's Shard</span> — Blade Fury slow for catch; a mid-game luxury.</li>
+            <li><span style="color:var(--bone)">Divine Rapier</span> — closing games or a desperation comeback swing.</li>
+            <li><span style="color:var(--bone)">Black King Bar</span> — <em>rare</em>: only vs CC chains you can't dodge with spin. Blade Fury already gives an immunity window.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Neutral items &amp; enchantments (7.41 system)</h3>
+      <div class="call warn"><span class="lab">Reworked in 7.41</span>The neutral system changed a lot: <strong>tier-1 neutrals now drop from 0:00</strong>, and <strong>enchantments were reworked</strong> — the old randomness is gone and the options are now <strong>tied to your hero's primary attribute (Agility for you)</strong>. Several artifacts returned (Dagger of Ristul, Possessed Mask, Cloak of Flames, Witchbane) and new ones were added. Exact best-in-slot picks shift every hotfix, so treat the below as <em>principles</em> and confirm the live options in-client.</div>
+      <div class="grid g2">
+        <div class="card"><h4 style="color:var(--jade)">What to prioritize on Juggernaut</h4>
+          <ul class="dash" style="font-size:13.5px;margin-bottom:0">
+            <li><strong>Attack speed &amp; agility</strong> — your fast attack + crit converts it directly into DPS.</li>
+            <li><strong>Damage / crit / armor-shred</strong> neutrals — anything that multiplies your right-click and Omnislash.</li>
+            <li><strong>Early durability</strong> (a lane shield / armor artifact) if you're being physically harassed.</li>
+            <li><strong>A blink or mobility</strong> tier-4/5 artifact can add another gap-closer for Omnislash setups.</li>
+          </ul>
+        </div>
+        <div class="card"><h4 style="color:var(--jade)">Enchantments (Agility pool)</h4>
+          <ul class="dash" style="font-size:13.5px;margin-bottom:0">
+            <li>Because enchantments now key off your <strong>primary attribute</strong>, you'll be offered <strong>agility-oriented</strong> options — lean into attack speed / agility / movement.</li>
+            <li>No more gambling: the choices are fixed and consistent, so pick the one that fits the game (tempo/chase vs. raw combat stats).</li>
+            <li>Re-evaluate your enchantment as you tier up — a laning-awareness pick early can become a combat-stat pick once fights start.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 TIMINGS -->
+    <section id="timings">
+      <div class="sec-head"><span class="num">08</span><h2>Power Spikes &amp; Timings</h2></div>
+      <p class="lead">Juggernaut is a hero of windows. Know exactly when you're strong so you fight on your spikes and farm through your lulls.</p>
+      <div class="grid g2">
+        <div class="card tint"><span class="k" style="color:var(--jade)">Level 6</span><h4 style="margin:6px 0 4px">First Omnislash</h4><p style="font-size:13.5px;margin:0">Your biggest early spike. With a stun support you can delete a support or careless core. Look for a pickoff the moment it's up.</p></div>
+        <div class="card tint"><span class="k" style="color:var(--jade)">Level 7</span><h4 style="margin:6px 0 4px">Blade Fury maxed</h4><p style="font-size:13.5px;margin:0">Lowest spin cooldown and highest DPS — you can spin more freely for damage, farm and dodges.</p></div>
+        <div class="card tint"><span class="k" style="color:var(--jade)">~13 min</span><h4 style="margin:6px 0 4px">Battle Fury online</h4><p style="font-size:13.5px;margin:0">Farm explodes. Flash-farm jungle + lanes, hit your next items on time, and start converting gold into fights.</p></div>
+        <div class="card tint"><span class="k" style="color:var(--jade)">~21 min</span><h4 style="margin:6px 0 4px">Manta timing</h4><p style="font-size:13.5px;margin:0">Survivability + illusions + dispel. You can take real fights and split-push safely now.</p></div>
+        <div class="card tint"><span class="k" style="color:var(--gold)">~31&ndash;32 min</span><h4 style="margin:6px 0 4px">Blink + Aghanim's</h4><p style="font-size:13.5px;margin:0">Reliable isolated Omnislash <em>and</em> a second Swift Slash. Your peak pickoff window — force fights and objectives.</p></div>
+        <div class="card tint"><span class="k">Late</span><h4 style="margin:6px 0 4px">Crit-cleave monster</h4><p style="font-size:13.5px;margin:0">Butterfly + crit + Battle Fury cleave + lifesteal talent. You're a self-sustaining right-click carry that also deletes a hero every ult.</p></div>
+      </div>
+      <div class="call gold"><span class="lab">Duration read</span>This patch Juggernaut is slightly stronger the longer the game goes (win rate climbs after 35 min). Don't panic-fight even matchups early — hit your timings, use Omnislash to grab tempo, and trust your scaling.</div>
+    </section>
+
+    <!-- 9 MACRO -->
+    <section id="macro">
+      <div class="sec-head"><span class="num">09</span><h2>Macro Playbook</h2></div>
+      <p class="lead">The part most guides skip. Item and skill order win you nothing if your movement, farm routing and fight selection are wrong. Here's the full map-level game.</p>
+
+      <h3>Laning phase (0&ndash;10 min)</h3>
+      <ul>
+        <li><strong>Win the lane, don't just survive it.</strong> Juggernaut wins most lanes (+1.2% net worth @10 on average). Last-hit greedily, deny when you can, and use Blade Fury to clear the wave for a fast level 2&ndash;3.</li>
+        <li><strong>Coordinate First Blood.</strong> With a support stun/slow, spin on the enemy offlaner at level 1&ndash;2 — Blade Fury's DoT plus lockdown often kills outright.</li>
+        <li><strong>Manage your spin.</strong> Don't burn Blade Fury purely to harass and then have no dodge/escape when they collapse. Spin to trade, then respect the counter-gank.</li>
+        <li><strong>Sustain with the ward.</strong> Value-point Healing Ward resets you to full between waves so you never have to leave lane.</li>
+        <li><strong>Pull vs push:</strong> if you're winning, keep the lane pushing to deny their farm and pressure tower; if harassed, let your support pull to reset equilibrium closer to your tower.</li>
+        <li><strong>Benchmark:</strong> aim for Power Treads + a Wraith Band + level 6 by ~6 minutes; start Battle Fury components once boots are done.</li>
+      </ul>
+
+      <h3>Farming patterns &amp; efficiency</h3>
+      <ul>
+        <li><strong>Battle Fury is the whole plan early.</strong> Rush it, then use cleave to clear a camp and a wave almost simultaneously. One Blade Fury empties most camps instantly.</li>
+        <li><strong>Route, don't wander.</strong> Chain lane creeps into adjacent jungle camps; pre-stack camps for yourself when you have a spare moment.</li>
+        <li><strong>Use illusions &amp; mobility.</strong> Manta illusions farm a second spot or push a lane while you farm another; with Swift Blink / Boots of Travel you hop between farm zones.</li>
+        <li><strong>Target ~600&ndash;800 GPM</strong> in the mid-game — but never farm a camp when Omnislash is up and a support is walking alone. Kills &gt; camps for a tempo carry.</li>
+        <li><strong>Keep Bladeform stacks alive</strong> (if you drafted it) — farm cleanly, avoid needless creep damage, and you carry free agility + speed everywhere.</li>
+      </ul>
+
+      <h3>Objectives &amp; map control</h3>
+      <ul>
+        <li><strong>Turn pickoffs into buildings.</strong> Every Omnislash kill is a 5v4 window — immediately take the nearest tower or Roshan rather than walking home.</li>
+        <li><strong>Tower gold is your best gold.</strong> Push out lanes with cleave to bank tower gold and deny map space.</li>
+        <li><strong>Roshan:</strong> you're not a great <em>solo</em> early Rosher, but with Battle Fury + team you contest fine. Take the Aegis on yourself after an item spike so a bad fight doesn't lose the game.</li>
+        <li><strong>Tormentor:</strong> grab the Shard once you have a lane presence — Blade Fury slow adds real catch.</li>
+        <li><strong>Vision as a carry:</strong> carry sentries/dust to deward the routes you farm and to reveal the invis heroes that kite your Omnislash. Don't rely on supports for your own safety.</li>
+      </ul>
+
+      <h3>Teamfighting — your role</h3>
+      <ul>
+        <li><strong>You are a pickoff &amp; cleanup carry, not the initiator.</strong> Let your team's CC land first, then Blink → Omnislash the key backliner, or right-click the frontline down.</li>
+        <li><strong>Drop Healing Ward before the fight</strong>, hidden at the fight's edge/behind terrain, and micro it with you. Not after you're already dying.</li>
+        <li><strong>Blade Fury to dodge the fight-deciding spell</strong> (a targeted stun/silence/hex) while you keep DPSing or reposition.</li>
+        <li><strong>Omnislash has two jobs:</strong> offensively to delete a target; defensively, the invulnerability dodges an incoming combo that would kill you. Great players save it as a "no" button when needed.</li>
+        <li><strong>Manta mid-fight</strong> dispels silences/roots/dust and splits incoming damage across illusions.</li>
+        <li><strong>Never ult into the creep wave or illusions.</strong> Reposition two steps into open ground first.</li>
+      </ul>
+
+      <h3>Split-push &amp; tempo</h3>
+      <ul>
+        <li>With Battle Fury + Manta + Boots of Travel you're an elite split-pusher: spin clears the wave, illusions push, and you escape with Blade Fury or Blink.</li>
+        <li>When a 5v5 is unfavorable, <strong>pressure a side lane</strong> to force a response, then TP/blink out — you win the map, not the fight.</li>
+        <li>Keep an eye on enemy positions before committing to a deep push; your escape is spin + blink, not invisibility.</li>
+      </ul>
+
+      <h3>Late game &amp; closing</h3>
+      <ul>
+        <li>You're now a self-sustaining crit-cleave carry with a double ult. Play the <strong>1-3-1</strong> or deathball depending on your team.</li>
+        <li>Watch mana before every commit (low INT bites hardest here) and mind buyback timing — a dead carry with no buyback loses games.</li>
+        <li>Use Omnislash to open (delete their carry) <em>or</em> to survive their initiation — read which the fight needs.</li>
+        <li>Rapier only when you can protect it and it closes the game; otherwise stay tanky (Skadi, Butterfly, lifesteal).</li>
+      </ul>
+    </section>
+
+    <!-- 10 COMBOS -->
+    <section id="combos">
+      <div class="sec-head"><span class="num">10</span><h2>Combos &amp; Mechanics</h2></div>
+      <p class="lead">The hands-on tech that separates good Juggernauts from great ones. Practice these in a lobby until they're muscle memory.</p>
+
+      <div class="grid g2">
+        <div class="card"><h4>Blink → Omnislash (the pickoff)</h4><p style="font-size:13.5px;margin:0">Blink to close the gap, land on your target so the <strong>first</strong> slash is guaranteed, and cast in open ground so creeps/illusions don't steal jumps. This is your bread-and-butter kill.</p></div>
+        <div class="card"><h4>Omnislash → Basher/Abyssal cleanup</h4><p style="font-size:13.5px;margin:0">Ult bursts them low; the instant invulnerability ends, <strong>bash + right-click</strong> to finish before they escape. Abyssal can also lock <em>first</em>, then Omnislash a guaranteed target.</p></div>
+        <div class="card"><h4>Spin-dodge</h4><p style="font-size:13.5px;margin:0">Blade Fury's debuff immunity <strong>removes and blocks most targeted disables</strong> the moment they'd land — practice spinning as a stun/hex is about to hit. Walk out of channels while spinning.</p></div>
+        <div class="card"><h4>Healing Ward micro</h4><p style="font-size:13.5px;margin:0">Bind ward control. Drop it behind trees / on high ground, move it with you, and <strong>body-block</strong> enemies trying to snipe it. A living ward wins fights.</p></div>
+        <div class="card"><h4>Manta dispel &amp; dodge</h4><p style="font-size:13.5px;margin:0">Manta cleanses silences, roots, dust and slows, and the illusions split damage. Use it to break out of lockdown or to dodge on-hit effects, then keep attacking.</p></div>
+        <div class="card"><h4>Swift Slash + Omnislash double</h4><p style="font-size:13.5px;margin:0">With Aghanim's you have two burst windows. Chain them on a tanky target, or use one to pick off and hold the other for the next threat.</p></div>
+        <div class="card"><h4>Treads toggle</h4><p style="font-size:13.5px;margin:0">Toggle to <strong>Strength</strong> to have the mana for Omnislash + Blade Fury, then back to <strong>Agility</strong> for the attacks. A mistimed toggle is a missed kill or a failed escape.</p></div>
+        <div class="card"><h4>Duelist facing</h4><p style="font-size:13.5px;margin:0">Attacking enemies who face you deals bonus damage — and it's always on during Omnislash. In a duel, force them to fight you head-on rather than trading from behind.</p></div>
+      </div>
+      <div class="call warn"><span class="lab">Spin doesn't block everything</span>Blade Fury will <strong>not</strong> save you from displacement (Meat Hook, Skewer) and is <strong>pierced</strong> by Doom, Legion's Duel and Dismember. Pugna's Nether Ward also damages you <em>before</em> immunity applies. Know these before you spin into a "safe" escape.</div>
+    </section>
+
+    <!-- 11 COUNTERS -->
+    <section id="counters">
+      <div class="sec-head"><span class="num">11</span><h2>Hero Counters &amp; How to Beat Them</h2></div>
+      <p class="lead">Every counter has an answer. Learn <em>why</em> each hero is a problem and the concrete play/item that solves it.</p>
+
+      <div class="matchgrid">
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="URS"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/ursa.png" onerror="this.remove()"></span><b>Ursa</b></div><div><div class="why">Fury Swipes stacks aren't stopped by your spin, and Enrage cuts Omnislash damage — he out-duels you in melee.</div><div class="fix"><b>Answer:</b> never stand and trade; kite with move speed, go tanky (Skadi), and don't feed his Enrage window.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="LC"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/legion_commander.png" onerror="this.remove()"></span><b>Legion Commander</b></div><div><div class="why">Duel pierces spell immunity, forces you to attack, and blocks Omnislash — a won Duel can outright kill you.</div><div class="fix"><b>Answer:</b> Linken's Sphere blocks Duel; hold Manta/BKB; position so you're never the closest target.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="DOOM"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/doom_bringer.png" onerror="this.remove()"></span><b>Doom</b></div><div><div class="why">Doom pierces immunity and shuts your whole kit off for a very long duration.</div><div class="fix"><b>Answer:</b> Linken's Sphere is the premier buy; don't get caught isolated; BKB helps against his follow-up.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="PUD"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pudge.png" onerror="this.remove()"></span><b>Pudge / Clockwerk</b></div><div><div class="why">Hook and Hookshot are displacement — your spin won't stop the grab, and Dismember pierces immunity.</div><div class="fix"><b>Answer:</b> Linken's (vs Hook/Dismember), tight positioning, and don't walk through obvious hook angles.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="OD"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/obsidian_destroyer.png" onerror="this.remove()"></span><b>Outworld Destroyer</b></div><div><div class="why">Astral Imprisonment removes your target mid-Omnislash, and Sanity's Eclipse punishes your low mana pool hard.</div><div class="fix"><b>Answer:</b> build INT/HP (Skadi), keep your mana topped, and catch him out of position rather than diving a ready OD.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="PUG"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/pugna.png" onerror="this.remove()"></span><b>Pugna</b></div><div><div class="why">Nether Ward damages you for casting (before spin immunity applies), and Decrepify makes your Omnislash target immune to physical.</div><div class="fix"><b>Answer:</b> kill the ward first, don't spin next to it, and wait out Decrepify before committing your ult.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="PA"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/phantom_assassin.png" onerror="this.remove()"></span><b>Evasion cores (PA / WR)</b></div><div><div class="why">Evasion makes your attacks and Omnislash slashes miss — your entire damage plan whiffs.</div><div class="fix"><b>Answer:</b> <b style="color:var(--steelblue)">Monkey King Bar</b> for guaranteed true-strike before you commit to fights.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="OMNI"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/omniknight.png" onerror="this.remove()"></span><b>Omniknight / saves</b></div><div><div class="why">Guardian Angel (and Astral, Ghost forms, damage-block) negate the physical damage of Omnislash entirely.</div><div class="fix"><b>Answer:</b> Nullifier to mute the save, or bait/wait it out — don't ult into an active immunity.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="SS"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/shadow_shaman.png" onerror="this.remove()"></span><b>Chain CC (Shaman / Bane)</b></div><div><div class="why">Long single-target disables catch you between spins and lock you out of the fight entirely.</div><div class="fix"><b>Answer:</b> Manta dispel, Linken's, or (rarely) BKB; never walk in first — let CC be spent on someone else.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="SB"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/spirit_breaker.png" onerror="this.remove()"></span><b>Break (Silver Edge users)</b></div><div><div class="why">Break disables Blade Dance crit and Bladeform — stripping a huge share of your damage and stats.</div><div class="fix"><b>Answer:</b> don't let the Silver Edge carrier sit on you; itemize burst and end fights before Break matters.</div></div></div>
+
+      <div class="mrow bad"><div class="who"><span class="ic hero" data-i="NAGA"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/naga_siren.png" onerror="this.remove()"></span><b>Illusion / summon heroes</b></div><div><div class="why">Naga, Phantom Lancer, Meepo, Brood, Chen — Omnislash scatters onto units and creeps, and they body-block your isolation.</div><div class="fix"><b>Answer:</b> lean on Battle Fury cleave + MKB right-click, isolate the real hero, and don't waste ult into a swarm.</div></div></div>
+      </div>
+    </section>
+
+    <!-- 12 SYNERGIES -->
+    <section id="synergies">
+      <div class="sec-head"><span class="num">12</span><h2>Ally Synergies</h2></div>
+      <p class="lead">Juggernaut wants two things from teammates: <strong>lockdown that holds a target still</strong> for Omnislash, and <strong>isolation that clears creeps away</strong> so slashes don't scatter. These allies deliver.</p>
+
+      <div class="matchgrid">
+      <div class="mrow good"><div class="who"><span class="ic hero" data-i="MAG"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/magnataur.png" onerror="this.remove()"></span><b>Magnus</b></div><div><div class="why">Reverse Polarity groups the enemy and holds them still; Empower gives you cleave. You clean up a stunned, clumped team.</div></div></div>
+
+      <div class="mrow good"><div class="who"><span class="ic hero" data-i="MARS"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/mars.png" onerror="this.remove()"></span><b>Mars</b></div><div><div class="why">Arena of Blood <strong>walls off creeps and allies</strong> — the perfect Omnislash isolation chamber — while Spear pins the target.</div></div></div>
+
+      <div class="mrow good"><div class="who"><span class="ic hero" data-i="DISR"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/disruptor.png" onerror="this.remove()"></span><b>Disruptor</b></div><div><div class="why">Glimpse yanks a fleeing hero back into the open and Static Storm locks the area — a guaranteed, isolated Omnislash target.</div></div></div>
+
+      <div class="mrow good"><div class="who"><span class="ic hero" data-i="FV"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/faceless_void.png" onerror="this.remove()"></span><b>Faceless Void</b></div><div><div class="why">Chronosphere freezes a target so you can walk up and Omnislash it safely with zero counter-play.</div></div></div>
+
+      <div class="mrow good"><div class="who"><span class="ic hero" data-i="SS"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/shadow_shaman.png" onerror="this.remove()"></span><b>Shadow Shaman / Lion</b></div><div><div class="why">Long reliable disables (Shackles, Hex, Impale) set up First Blood in lane and hold targets for your ult.</div></div></div>
+
+      <div class="mrow good"><div class="who"><span class="ic hero" data-i="SD"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/shadow_demon.png" onerror="this.remove()"></span><b>Shadow Demon</b></div><div><div class="why">Disruption isolates a hero from creeps and Soul Catcher amplifies your Omnislash burst — a two-for-one enabler.</div></div></div>
+
+      <div class="mrow good"><div class="who"><span class="ic hero" data-i="SLAR"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/slardar.png" onerror="this.remove()"></span><b>Slardar / Vengeful</b></div><div><div class="why">Armor reduction multiplies every crit and Omnislash slash; Venge's swap can also drag your target into the open.</div></div></div>
+
+      <div class="mrow good"><div class="who"><span class="ic hero" data-i="ORA"><img src="https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/oracle.png" onerror="this.remove()"></span><b>Oracle / Dazzle</b></div><div><div class="why">Save spells keep you alive to carry; False Promise + your lifesteal &amp; Healing Ward makes for an unkillable dive window.</div></div></div>
+      </div>
+    </section>
+
+    <!-- 13 MATCHUP ITEMIZATION -->
+    <section id="matchups">
+      <div class="sec-head"><span class="num">13</span><h2>Itemizing Against Comps</h2></div>
+      <p class="lead">Read the enemy draft and buy accordingly. Your core is flexible after Manta — bend the back half of your build to the problem in front of you.</p>
+      <div class="grid g2">
+        <div class="card"><h4 style="color:var(--jade)">vs Evasion</h4><p style="font-size:13.5px;margin:0">PA, Windranger, Butterfly stackers → <strong>Monkey King Bar</strong>, non-negotiable before the fight.</p></div>
+        <div class="card"><h4 style="color:var(--jade)">vs Magic burst / chain CC</h4><p style="font-size:13.5px;margin:0"><strong>Manta</strong> (dispel), <strong>Eye of Skadi</strong> (HP), <strong>Linken's</strong>, and rarely <strong>BKB</strong> for uncounterable chains.</p></div>
+        <div class="card"><h4 style="color:var(--jade)">vs Single-target lockdown</h4><p style="font-size:13.5px;margin:0">Doom, Legion Duel, Hex, Hook → <strong>Linken's Sphere</strong> to eat the opener.</p></div>
+        <div class="card"><h4 style="color:var(--jade)">vs Illusions / summons</h4><p style="font-size:13.5px;margin:0">Lean on <strong>Battle Fury cleave</strong> + <strong>MKB</strong> right-click; isolate the real hero, don't ult the swarm.</p></div>
+        <div class="card"><h4 style="color:var(--jade)">vs High armor / physical</h4><p style="font-size:13.5px;margin:0">An <strong>armor-shred neutral</strong> or <strong>Nullifier</strong>; reducing armor makes every crit and Omnislash slash bite harder.</p></div>
+        <div class="card"><h4 style="color:var(--jade)">vs Heals / Ghost / Eul saves</h4><p style="font-size:13.5px;margin:0"><strong>Nullifier</strong> (mute + slow) and <strong>Skadi</strong> (healing reduction) shut down the escape/heal.</p></div>
+      </div>
+    </section>
+
+    <!-- 14 TIPS -->
+    <section id="tips">
+      <div class="sec-head"><span class="num">14</span><h2>Tips, Tricks &amp; Do / Don't</h2></div>
+      <div class="dodont">
+        <div class="col do">
+          <div class="h">Do</div>
+          <ul style="margin-bottom:0;font-size:14px">
+            <li>Toggle Treads to Strength before casting Omnislash + spin.</li>
+            <li>Keep a Mango/Wand for emergency mana — mana is your #1 killer.</li>
+            <li>Isolate with Blink so Omnislash single-targets your kill.</li>
+            <li>Save Omnislash as a defensive "no" button when the fight demands it.</li>
+            <li>Drop Healing Ward <em>before</em> a fight and micro it to safety.</li>
+            <li>Carry sentries/dust — deward your farm and reveal kiters.</li>
+            <li>Rush Battle Fury; it funds your entire timing.</li>
+            <li>Buy MKB the moment you see evasion.</li>
+          </ul>
+        </div>
+        <div class="col dont">
+          <div class="h">Don't</div>
+          <ul style="margin-bottom:0;font-size:14px">
+            <li>Omnislash into a creep wave, illusions, or a clump — slashes scatter.</li>
+            <li>Spin as your only escape and then get caught with it on cooldown.</li>
+            <li>Over-farm through your 12&ndash;25 min pickoff window.</li>
+            <li>Ult into an active Guardian Angel / Astral / Ghost / Decrepify.</li>
+            <li>Trade auto-attacks with Ursa or walk into a ready Legion Duel.</li>
+            <li>Forget buyback/mana before a late-game commit.</li>
+            <li>Leave Healing Ward in the open where any AoE kills it.</li>
+            <li>Assume spin blocks hooks, Doom, or Dismember — it doesn't.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15 CHECKLIST -->
+    <section id="checklist">
+      <div class="sec-head"><span class="num">15</span><h2>Coach's TL;DR Checklist</h2></div>
+      <p class="lead">If you remember nothing else, remember this. Print it, pin it, run it every game.</p>
+      <div class="grid g2">
+        <div class="card"><h4>Draft &amp; setup</h4><ul class="check" style="margin-bottom:0;font-size:14px">
+          <li>Pos 1 safelane — <strong>Duelist + Bladeform</strong> innates (no facet to pick).</li>
+          <li>Pair with a stun support for First Blood + Omnislash.</li>
+          <li>Avoid vs Ursa / LC / heavy illusions unless your team peels.</li>
+        </ul></div>
+        <div class="card"><h4>Build spine</h4><ul class="check" style="margin-bottom:0;font-size:14px">
+          <li>Treads → <strong>Battle Fury (~13m)</strong> → Manta → Butterfly.</li>
+          <li>Blink → <strong>Aghanim's</strong> for double ult, then situational.</li>
+          <li>Talents: 25 lifesteal, 20 crit dmg, 15 flex, 10 Bladeform interval.</li>
+        </ul></div>
+        <div class="card"><h4>In-game rhythm</h4><ul class="check" style="margin-bottom:0;font-size:14px">
+          <li>Win lane → hit 6 → <strong>isolated Omnislash pickoffs</strong>.</li>
+          <li>Turn every kill into a tower/Roshan/objective.</li>
+          <li>Fight on your spikes; farm cleanly through the lulls.</li>
+        </ul></div>
+        <div class="card"><h4>Micro habits</h4><ul class="check" style="margin-bottom:0;font-size:14px">
+          <li>Treads toggle + mana check before every ult.</li>
+          <li>Blink to isolate; open ground only.</li>
+          <li>Healing Ward hidden &amp; microed; spin to dodge the key spell.</li>
+        </ul></div>
+      </div>
+      <div class="call tip"><span class="lab">One sentence</span><strong>Win your lane, snowball with isolated Omnislash pickoffs, rush Battle Fury, and scale into a crit-cleave carry — while never running out of mana.</strong></div>
+    </section>
+
+    <footer>
+      <b>Juggernaut Coach's Playbook</b> — built for patch <b>7.41</b> (verified July 16, 2026; data reflects 7.41d high-MMR trends).<br>
+      <b>Note:</b> Facets were removed from Dota 2 entirely in Patch 7.41 (March 2026). Juggernaut now has two permanent innates — Duelist and Bladeform — and no facet choice.<br>
+      Hero, ability and item icons are Valve's official Dota 2 assets (the same set catalogued on Liquipedia's Dota 2 icon categories), loaded from Valve's public CDN; where an icon can't load, a labelled placeholder is shown instead. Stats and builds shift every patch — always verify live numbers in-client. <br>
+      Dota 2 and all related assets are trademarks of Valve Corporation. This is an unofficial fan-made coaching reference.
+    </footer>
+  </main>
+</div>
+
+<script>
+  // Build nav from sections
+  const secs=[...document.querySelectorAll('section')];
+  const titles={overview:'Identity',stats:'Stats',facets:'Innates',abilities:'Abilities',skillbuild:'Skill Build',talents:'Talents',items:'Items',timings:'Timings',macro:'Macro',combos:'Combos',counters:'Counters',synergies:'Synergies',matchups:'Matchups',tips:'Tips',checklist:'Checklist'};
+  const railnav=document.getElementById('railnav'), mnav=document.getElementById('mnav');
+  secs.forEach((s,i)=>{
+    const id=s.id, name=titles[id]||id;
+    const a=document.createElement('a');a.href='#'+id;
+    a.innerHTML='<span class="n">'+String(i+1).padStart(2,'0')+'</span>'+name;
+    a.dataset.id=id; railnav.appendChild(a);
+    const m=document.createElement('a');m.href='#'+id;m.textContent=name;m.dataset.id=id;mnav.appendChild(m);
+  });
+
+  // Scrollspy
+  const links=[...document.querySelectorAll('#railnav a, #mnav a')];
+  const spy=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const id=e.target.id;
+        links.forEach(l=>l.classList.toggle('on',l.dataset.id===id));
+        const active=document.querySelector('#mnav a.on');
+        if(active) active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+      }
+    });
+  },{rootMargin:'-45% 0px -50% 0px',threshold:0});
+  secs.forEach(s=>spy.observe(s));
+
+  // Facet toggle
+  function facet(k){
+    document.getElementById('facet-form').classList.toggle('on',k==='form');
+    document.getElementById('facet-storm').classList.toggle('on',k==='storm');
+    document.getElementById('btn-form').classList.toggle('on',k==='form');
+    document.getElementById('btn-storm').classList.toggle('on',k==='storm');
+  }
+  window.facet=facet;
+</script>
+</body>
+</html>
